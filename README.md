@@ -248,4 +248,300 @@ function probarDispositivoFactory() {
 // Ejecutar las pruebas
 probarDispositivoFactory();
 
+
+//Perifericos de salida
+// Clase base para periféricos de salida
+abstract class PerifericoSalida {
+    abstract tipo: string;
+    abstract mostrarInfo(): void;
+}
+// Clase Monitor
+class Monitor extends PerifericoSalida {
+    tipo = "Monitor";
+    resolucion: string;
+
+    constructor(resolucion: string) {
+        super();
+        this.resolucion = resolucion;
+    }
+
+    mostrarInfo(): void {
+        console.log(`Tipo: ${this.tipo}, Resolución: ${this.resolucion}`);
+    }
+}
+
+// Clase Impresora
+class Impresora extends PerifericoSalida {
+    tipo = "Impresora";
+    tipoImpresion: string;
+
+    constructor(tipoImpresion: string) {
+        super();
+        this.tipoImpresion = tipoImpresion;
+    }
+
+    mostrarInfo(): void {
+        console.log(`Tipo: ${this.tipo}, Tipo de Impresión: ${this.tipoImpresion}`);
+    }
+}
+
+// Clase Proyector
+class Proyector extends PerifericoSalida {
+    tipo = "Proyector";
+    brillo: number;
+
+    constructor(brillo: number) {
+        super();
+        this.brillo = brillo;
+    }
+
+    mostrarInfo(): void {
+        console.log(`Tipo: ${this.tipo}, Brillo: ${this.brillo} lúmenes`);
+    }
+}
+class PerifericoSalidaFactory {
+    crearPeriferico(tipo: string, opciones: any): PerifericoSalida | null {
+        switch (tipo) {
+            case "Monitor":
+                return new Monitor(opciones.resolucion);
+            case "Impresora":
+                return new Impresora(opciones.tipoImpresion);
+            case "Proyector":
+                return new Proyector(opciones.brillo);
+            default:
+                console.log("Tipo de periférico no soportado");
+                return null;
+        }
+    }
+}
+// Crear una instancia de la fábrica
+const fabrica = new PerifericoSalidaFactory();
+
+// Crear un monitor
+const monitor = fabrica.crearPeriferico("Monitor", { resolucion: "1920x1080" });
+if (monitor) monitor.mostrarInfo();  // Output: Tipo: Monitor, Resolución: 1920x1080
+
+// Crear una impresora
+const impresora = fabrica.crearPeriferico("Impresora", { tipoImpresion: "Láser" });
+if (impresora) impresora.mostrarInfo();  // Output: Tipo: Impresora, Tipo de Impresión: Láser
+
+// Crear un proyector
+const proyector = fabrica.crearPeriferico("Proyector", { brillo: 3000 });
+if (proyector) proyector.mostrarInfo();  // Output: Tipo: Proyector, Brillo: 3000 lúmenes
+interface Observador {
+    actualizar(equipo: Equipo): void;
+}
+
+
+
+//Observer
+//Ejercicio 1
+
+class DepartamentoMantenimiento implements Observador {
+    actualizar(equipo: Equipo): void {
+        console.log(`Notificación: El equipo ${equipo.nombre} necesita mantenimiento preventivo.`);
+    }
+}
+class Equipo {
+    nombre: string;
+    tipo: string;
+    estado: string;
+    tiempoUso: number;
+    umbralMantenimiento: number;
+    observadores: Observador[] = [];
+
+    constructor(nombre: string, tipo: string, estado: string, tiempoUso: number, umbralMantenimiento: number) {
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.estado = estado;
+        this.tiempoUso = tiempoUso;
+        this.umbralMantenimiento = umbralMantenimiento;
+    }
+
+    agregarObservador(observador: Observador): void {
+        this.observadores.push(observador);
+    }
+
+    notificarObservadores(): void {
+        this.observadores.forEach((observador) => observador.actualizar(this));
+    }
+
+    aumentarTiempoUso(horas: number): void {
+        this.tiempoUso += horas;
+        if (this.tiempoUso >= this.umbralMantenimiento) {
+            this.notificarObservadores();
+        }
+    }
+}
+// Crear el equipo
+const equipo1 = new Equipo("Torno", "Mecánico", "Operativo", 95, 100);
+
+// Crear el observador (departamento de mantenimiento)
+const departamentoMantenimiento = new DepartamentoMantenimiento();
+
+// Agregar el observador al equipo
+equipo1.agregarObservador(departamentoMantenimiento);
+
+// Aumentar el tiempo de uso para disparar la notificación
+equipo1.aumentarTiempoUso(10);  // Output: Notificación: El equipo Torno necesita mantenimiento preventivo.
+
+//Ejercicio 2
+
+interface Observador {
+    actualizar(inventario: Inventario): void;
+}
+
+class InterfazUsuario implements Observador {
+    nombre: string;
+
+    constructor(nombre: string) {
+        this.nombre = nombre;
+    }
+
+    actualizar(inventario: Inventario): void {
+        console.log(`Interfaz ${this.nombre} actualizada. Inventario actual:`);
+        inventario.listarEquipos();
+    }
+}
+class Inventario {
+    private equipos: string[] = [];
+    private observadores: Observador[] = [];
+
+    agregarObservador(observador: Observador): void {
+        this.observadores.push(observador);
+    }
+
+    eliminarObservador(observador: Observador): void {
+        const index = this.observadores.indexOf(observador);
+        if (index !== -1) {
+            this.observadores.splice(index, 1);
+        }
+    }
+
+    notificarObservadores(): void {
+        this.observadores.forEach(observador => observador.actualizar(this));
+    }
+
+    agregarEquipo(equipo: string): void {
+        this.equipos.push(equipo);
+        this.notificarObservadores();
+    }
+
+    eliminarEquipo(equipo: string): void {
+        const index = this.equipos.indexOf(equipo);
+        if (index !== -1) {
+            this.equipos.splice(index, 1);
+            this.notificarObservadores();
+        }
+    }
+
+    listarEquipos(): void {
+        console.log(this.equipos.join(", "));
+    }
+}
+class Inventario {
+    private equipos: string[] = [];
+    private observadores: Observador[] = [];
+
+    agregarObservador(observador: Observador): void {
+        this.observadores.push(observador);
+    }
+
+    eliminarObservador(observador: Observador): void {
+        const index = this.observadores.indexOf(observador);
+        if (index !== -1) {
+            this.observadores.splice(index, 1);
+        }
+    }
+
+    notificarObservadores(): void {
+        this.observadores.forEach(observador => observador.actualizar(this));
+    }
+
+    agregarEquipo(equipo: string): void {
+        this.equipos.push(equipo);
+        this.notificarObservadores();
+    }
+
+    eliminarEquipo(equipo: string): void {
+        const index = this.equipos.indexOf(equipo);
+        if (index !== -1) {
+            this.equipos.splice(index, 1);
+            this.notificarObservadores();
+        }
+    }
+
+    listarEquipos(): void {
+        console.log(this.equipos.join(", "));
+    }
+}
+interface IFacturacion {
+    generarFactura(idProducto: number, cantidad: number): void;
+    consultarFactura(idFactura: number): string;
+}
+class FacturacionVieja {
+    crearFactura(idProducto: number, cantidad: number): void {
+        console.log(`Factura creada en el sistema antiguo para el producto ${idProducto} con cantidad ${cantidad}.`);
+    }
+
+    obtenerFactura(idFactura: number): string {
+        return `Factura ${idFactura} obtenida del sistema antiguo.`;
+    }
+}
+class AdaptadorFacturacion implements IFacturacion {
+    private facturacionVieja: FacturacionVieja;
+
+    constructor(facturacionVieja: FacturacionVieja) {
+        this.facturacionVieja = facturacionVieja;
+    }
+
+    generarFactura(idProducto: number, cantidad: number): void {
+        this.facturacionVieja.crearFactura(idProducto, cantidad);
+    }
+
+    consultarFactura(idFactura: number): string {
+        return this.facturacionVieja.obtenerFactura(idFactura);
+    }
+}
+//Ejercicio 2
+interface IProveedor {
+    obtenerProductos(): any[];
+    actualizarInventario(idProducto: number, cantidad: number): void;
+}
+class ProveedorExternoAPI {
+    fetchProductos(): any[] {
+        // Simulando una respuesta desde la API externa
+        return [
+            { productId: 1, name: "Producto A", stock: 50 },
+            { productId: 2, name: "Producto B", stock: 30 },
+        ];
+    }
+
+    updateStock(productId: number, cantidad: number): void {
+        console.log(`Stock actualizado en la API externa para el producto ${productId} con cantidad ${cantidad}.`);
+    }
+}
+class AdaptadorProveedor implements IProveedor {
+    private proveedorExterno: ProveedorExternoAPI;
+
+    constructor(proveedorExterno: ProveedorExternoAPI) {
+        this.proveedorExterno = proveedorExterno;
+    }
+
+    obtenerProductos(): any[] {
+        // Adaptar los datos recibidos de la API externa al formato requerido por el sistema de inventario
+        const productosExternos = this.proveedorExterno.fetchProductos();
+        return productosExternos.map(producto => ({
+            id: producto.productId,
+            nombre: producto.name,
+            stock: producto.stock,
+        }));
+    }
+
+    actualizarInventario(idProducto: number, cantidad: number): void {
+        // Adaptar la solicitud de actualización de stock al formato de la API externa
+        this.proveedorExterno.updateStock(idProducto, cantidad);
+    }
+}
+
 ```
